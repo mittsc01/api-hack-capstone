@@ -60,6 +60,7 @@ function retrieveSunset(marker) {
     ]
     //this is the number of milliseconds of offset from UTC based on timezone and daylight savings
     const offset = 1000 * (data[3].rawOffset + data[3].dstOffset);
+    console.log(offset)
 
     //convert sunrise/sunset times to milliseconds since Jan 1 1970
     for (let i = 0; i < sunRiseSetArray.length; i++) {
