@@ -1,4 +1,4 @@
-function initMap2() {
+function initMap() {
 
   const ptList = [];
   const myLatLng = { lat: 0, lng: 0 };
@@ -35,7 +35,7 @@ function retrieveSunset(marker) {
   const urlTomorrow = `https://api.sunrise-sunset.org/json?lat=${marker.position.lat()}&lng=${marker.position.lng()}&formatted=0&date=tomorrow`
 
   //url for time zone/dst offset
-  const urlTimeZone = `https://maps.googleapis.com/maps/api/timezone/json?location=${marker.position.lat()},${marker.position.lng()}&timestamp=${Math.floor(currentDate / 1000)}&key=AIzaSyBVDMsZRfwy_Y4eIx4cvkBnJccJikEwl6s
+  const urlTimeZone = `https://maps.googleapis.com/maps/api/timezone/json?location=${marker.position.lat()},${marker.position.lng()}&timestamp=${Math.floor(currentDate / 1000)}&key=AIzaSyADZsPrXORmQTRUvCU-pMqSGlHW7iN6Ra0
     `
   Promise.all([
     fetch(urlYesterday),
@@ -58,8 +58,10 @@ function retrieveSunset(marker) {
       data[2].results.sunrise,
       data[2].results.sunset
     ]
+    //this is the number of milliseconds of offset from UTC based on timezone and daylight savings
     const offset = 1000 * (data[3].rawOffset + data[3].dstOffset);
 
+    //convert sunrise/sunset times to milliseconds since Jan 1 1970
     for (let i = 0; i < sunRiseSetArray.length; i++) {
       sunRiseSetArray[i] = new Date(sunRiseSetArray[i]).getTime()
     }
@@ -157,7 +159,7 @@ function addLeadingZero(minutes){
   return minutes
 }
 
-$(initMap2)
+
 
 
 
