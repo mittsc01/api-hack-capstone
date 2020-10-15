@@ -1,31 +1,49 @@
+//const markers=[];
+const infoWindows=[];
 function initMap() {
-
+  
   
   const myLatLng = { lat: 0, lng: 0 };
   const map = new google.maps.Map(document.getElementById("map"), {
     zoom: 2.5,
     center: myLatLng,
   });
-
+  const infowindow = new google.maps.InfoWindow();
+  
 
   google.maps.event.addListener(map, 'click', function (event) {
     placeMarker(event.latLng);
+    
   });
-
   function placeMarker(location) {
+    var infowindow = new google.maps.InfoWindow();
     var marker = new google.maps.Marker({
       position: location,
       map: map
     });
+    marker.addListener("click", () => {
+      infoWindows.forEach(window=>window.close())
+      infowindow.open(map, marker);
+      
+    });
+    
+    //markers.push(marker);
+    infoWindows.push(infowindow)
 
 
     retrieveSunset(marker)
+    
+    
 
   }
-
-
-
+  
 }
+
+  
+
+
+
+
 
 function retrieveSunset(marker) {
   const currentDate = new Date().getTime();
@@ -60,7 +78,7 @@ function retrieveSunset(marker) {
     ]
     //this is the number of milliseconds of offset from UTC based on timezone and daylight savings
     const offset = 1000 * (data[3].rawOffset + data[3].dstOffset);
-    console.log(sunRiseSetArray,offset)
+    
 
     //convert sunrise/sunset times to milliseconds since Jan 1 1970
     for (let i = 0; i < sunRiseSetArray.length; i++) {
@@ -77,7 +95,10 @@ function retrieveSunset(marker) {
 
 
     //should use a render function here
-    document.getElementById('sunset-display').innerHTML = generateHtmlString(printReadyObject)
+    infoWindows.forEach(window=>window.close())
+    infoWindows[infoWindows.length-1].setContent(generateHtmlString(printReadyObject))
+    infoWindows[infoWindows.length-1].open(map,marker)
+    
 
   }).catch(function (error) {
     // if there's an error, log it
