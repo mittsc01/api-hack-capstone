@@ -1,18 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Simple Markers</title>
+    <title>Chase the Sun</title>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
     <script
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyADZsPrXORmQTRUvCU-pMqSGlHW7iN6Ra0&callback=initMap&libraries=&v=weekly"
       defer
     ></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="./style.css" />
     <meta name="viewport" content="width=device-width">
     
   </head>
   <body>
-    <header></header>
+    <header>
+      <h1 class="text-center">Chase the Sun</h1>
+        
+        <!--Menu-->
+        <nav>
+            
+            <ul>
+                <li><button>About</button></li>
+                <li id="github"><a href="https://github.com/mittsc01/api-hack-capstone" target="_blank">View on Github</a></li>
+                
+                
+            </ul>
+        </nav>
+    </header>
     <div id="map"></div>
     
     <script

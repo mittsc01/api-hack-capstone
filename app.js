@@ -12,20 +12,23 @@ function initMap() {
   
   //This is the 'landing' message
   const contentString=
-  `<h1>Sun App</h1>
+  `<h2>About</h2>
   <p>
-  Welcome to the Sun app! Click anywhere to get info about sunrise and sunset.
-    If you click on a body of water, you likely won't get the local sunrise/sunset times, but you will get the
+  Welcome to the Chase the Sun app! Click anywhere to get info about sunrise and sunset.
+    If you click on a body of water, you may not get the local sunrise/sunset times, but you will get the
      time until sunrise/sunset. Sunrise and sunset data come from <a target="_blank "href="https://sunrise-sunset.org/">sunrise-sunset.org<a>.
      All times are local 24 hour times.
      </p>
   
   `
-  const infowindow = new google.maps.InfoWindow({content:contentString, position:myLatLng});
+  const infowindow = new google.maps.InfoWindow({content:contentString, position:{lat: 40, lng: -95}});
   infoWindows.push(infowindow)
   infowindow.open(map)
   
-
+  $('button').on('click',e=>{
+    infoWindows.forEach(window=>window.close())
+    infoWindows[0].open(map)
+  })
   google.maps.event.addListener(map, 'click', function (event) {
     placeMarker(event.latLng);
     

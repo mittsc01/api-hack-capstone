@@ -25,6 +25,77 @@
       h1 {
         text-align: center;
       }
-      header {
-        height: 80px;
+      h2 {
+        text-align: center;
       }
+      
+      nav {
+        display: flex;
+        justify-content: center;
+    }
+    
+    nav ul {
+        display:flex;
+        
+        list-style: none;
+        padding-left: 0;
+        padding-bottom: 0;
+        
+        
+    }
+    nav ul li a{
+        margin-right: 20px;
+        color: white;
+        text-decoration: none;
+    
+    
+    }
+    button{
+      margin-right: 30px;
+    }
+    nav ul li:last-child a{
+        margin-right: 0px;
+    }
+    header h1 {
+      font-family: 'Lobster', cursive;
+      color: rgb(233, 196, 106);
+      padding:20px;
+      margin: 0;
+      font-size: 30px;
+  }
+  
+  header {
+      background-color: rgb(231, 111, 81);
+      
+  }    
+
+  @media all and (min-width: 600px) {
+    
+    h1 {
+        font-size: 30px;
+    }
+    h2 {
+        font-size: 24px;
+    }
+    a, ol, ul, button {
+        font-size: 14px;
+    }
+    
+    header {
+        display: flex;
+        justify-content: space-between;
+        padding: 0px 30px;
+    }
+    
+    header h1 {
+        margin: 14px 0px;
+    }
+    button{
+      margin-top: 32px;
+      
+    }
+    #github{
+      padding-top: 32px;
+    
+  }
+  
