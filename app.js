@@ -1,14 +1,25 @@
 //const markers=[];
+//TODO: handle clicks on water and far northern/southern areas.
 const infoWindows=[];
 function initMap() {
   
   
-  const myLatLng = { lat: 0, lng: 0 };
+  const myLatLng = { lat: 45, lng: -95 };
   const map = new google.maps.Map(document.getElementById("map"), {
-    zoom: 2.5,
+    zoom: 5,
     center: myLatLng,
   });
-  const infowindow = new google.maps.InfoWindow();
+  
+  const contentString=
+  `<h1>Sun App</h1>
+  <p>Welcome to the Sun app! Click anywhere to get info about sunrise and sunset.
+    If you click on a body of water, you likely won't get the local sunrise/sunset times, but you will get the
+     time until sunrise/sunset. Sunrise and sunset data come from <a href="https://sunrise-sunset.org/">sunrise-sunset.org<a></p>
+  
+  `
+  const infowindow = new google.maps.InfoWindow({content:contentString, position:myLatLng});
+  infoWindows.push(infowindow)
+  infowindow.open(map)
   
 
   google.maps.event.addListener(map, 'click', function (event) {
@@ -48,9 +59,15 @@ function initMap() {
 function retrieveSunset(marker) {
   const currentDate = new Date().getTime();
   //urls for retrieving sunrise and sunset times for the given location
-  const urlYesterday = `https://api.sunrise-sunset.org/json?lat=${marker.position.lat()}&lng=${marker.position.lng()}&formatted=0&date=yesterday`
-  const urlToday = `https://api.sunrise-sunset.org/json?lat=${marker.position.lat()}&lng=${marker.position.lng()}&formatted=0&date=today`
-  const urlTomorrow = `https://api.sunrise-sunset.org/json?lat=${marker.position.lat()}&lng=${marker.position.lng()}&formatted=0&date=tomorrow`
+  const sunRiseSetBaseUrl='https://api.sunrise-sunset.org/json?';
+  const sunRiseSetKeys = {
+    lat:marker.position.lat(),
+    lng:marker.position.lng(),
+    formatted:0
+  }
+  const urlYesterday = sunRiseSetBaseUrl+`lat=${marker.position.lat()}&lng=${marker.position.lng()}&formatted=0&date=yesterday`
+  const urlToday = sunRiseSetBaseUrl+`lat=${marker.position.lat()}&lng=${marker.position.lng()}&formatted=0&date=today`
+  const urlTomorrow = sunRiseSetBaseUrl+`lat=${marker.position.lat()}&lng=${marker.position.lng()}&formatted=0&date=tomorrow`
 
   //url for time zone/dst offset
   const urlTimeZone = `https://maps.googleapis.com/maps/api/timezone/json?location=${marker.position.lat()},${marker.position.lng()}&timestamp=${Math.floor(currentDate / 1000)}&key=AIzaSyADZsPrXORmQTRUvCU-pMqSGlHW7iN6Ra0
@@ -67,6 +84,7 @@ function retrieveSunset(marker) {
     }));
   }).then(function (data) {
     //console.log(data[1].timeZoneName)
+
     //array containing sunrise/sunset times for yesterday, today and tomorrow ordered sequentially
     const sunRiseSetArray = [
       data[0].results.sunrise,
@@ -147,10 +165,16 @@ function computeSunriseAndSunset(period, sunRiseSetArray) {
 //generates string to be rendered
 function generateHtmlString(sunRiseSetObject) {
   if (sunRiseSetObject.sundown) {
-    return `<h2>Currently the sun is down. Sunrise is at ${sunRiseSetObject.sunrise}. ${sunRiseSetObject.timeSinceEvent} since sunset. ${sunRiseSetObject.timeBeforeEvent} until sunrise.</h2>`
+    return `<div class="info-window sundown">
+    <img src="./icons8-moon-symbol-50.png" alt="moon icon" />
+    <p>Currently the sun is down. Sunrise is at ${sunRiseSetObject.sunrise}. ${sunRiseSetObject.timeSinceEvent} since sunset. ${sunRiseSetObject.timeBeforeEvent} until sunrise.</p>
+    </div>`
   }
   else {
-    return `<h2>Currently the sun is up. Sunset is at ${sunRiseSetObject.sunset}. ${sunRiseSetObject.timeSinceEvent} since sunrise. ${sunRiseSetObject.timeBeforeEvent} until sunset</h2>`
+    return `<div class="info-window sun-up">
+    <img src="./icons8-sun-50.png" alt="sun icon" />
+    <p>Currently the sun is up. Sunset is at ${sunRiseSetObject.sunset}. ${sunRiseSetObject.timeSinceEvent} since sunrise. ${sunRiseSetObject.timeBeforeEvent} until sunset</p>
+    </div>`
   }
 }
 
