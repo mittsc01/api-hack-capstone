@@ -10,11 +10,15 @@ function initMap() {
     center: myLatLng,
   });
   
+  //This is the 'landing' message
   const contentString=
   `<h1>Sun App</h1>
-  <p>Welcome to the Sun app! Click anywhere to get info about sunrise and sunset.
+  <p>
+  Welcome to the Sun app! Click anywhere to get info about sunrise and sunset.
     If you click on a body of water, you likely won't get the local sunrise/sunset times, but you will get the
-     time until sunrise/sunset. Sunrise and sunset data come from <a href="https://sunrise-sunset.org/">sunrise-sunset.org<a></p>
+     time until sunrise/sunset. Sunrise and sunset data come from <a target="_blank "href="https://sunrise-sunset.org/">sunrise-sunset.org<a>.
+     All times are local 24 hour times.
+     </p>
   
   `
   const infowindow = new google.maps.InfoWindow({content:contentString, position:myLatLng});
@@ -27,21 +31,23 @@ function initMap() {
     
   });
   function placeMarker(location) {
+    
     var infowindow = new google.maps.InfoWindow();
     var marker = new google.maps.Marker({
       position: location,
       map: map
     });
     marker.addListener("click", () => {
+      //close all infoWindows and open the infoWindow at the marker that was just clicked
       infoWindows.forEach(window=>window.close())
       infowindow.open(map, marker);
       
     });
     
-    //markers.push(marker);
+    
     infoWindows.push(infowindow)
 
-
+    
     retrieveSunset(marker)
     
     
@@ -57,6 +63,8 @@ function initMap() {
 
 
 function retrieveSunset(marker) {
+  
+  
   const currentDate = new Date().getTime();
   //urls for retrieving sunrise and sunset times for the given location
   const sunRiseSetBaseUrl='https://api.sunrise-sunset.org/json?';
@@ -83,8 +91,8 @@ function retrieveSunset(marker) {
       return response.json();
     }));
   }).then(function (data) {
-    //console.log(data[1].timeZoneName)
-
+    
+    
     //array containing sunrise/sunset times for yesterday, today and tomorrow ordered sequentially
     const sunRiseSetArray = [
       data[0].results.sunrise,
@@ -97,22 +105,34 @@ function retrieveSunset(marker) {
     //this is the number of milliseconds of offset from UTC based on timezone and daylight savings
     const offset = 1000 * (data[3].rawOffset + data[3].dstOffset);
     
+    //These variables are used only for cases where (dayLength) user clicks at  a location where sun is up/down all day
+    // or (timeZoneAvailable) where local time is unavailable (e.g. middle of the ocean)
+    const dayLength=Math.min(data[0].results['day_length'],data[1].results['day_length'],data[2].results['day_length']);
+    const timeZoneAvailable = data[3].status!=='ZERO_RESULTS'
+    
+
+    
+    
+    
 
     //convert sunrise/sunset times to milliseconds since Jan 1 1970
     for (let i = 0; i < sunRiseSetArray.length; i++) {
       sunRiseSetArray[i] = new Date(sunRiseSetArray[i]).getTime()
     }
-
+    
     const period = periodOfDay(sunRiseSetArray, currentDate)
 
-    const sunRiseSetObject = computeSunriseAndSunset(period, sunRiseSetArray)
+    const sunRiseSetObject = computeSunriseAndSunset(period, sunRiseSetArray,dayLength,timeZoneAvailable)
+    
 
     const localizedObject = translateTimesToLocal(sunRiseSetObject, offset)
 
     const printReadyObject = makeTimesReadable(localizedObject)
 
 
-    //should use a render function here
+    
+
+    //close open infowindow and open an infowindow at the marker just placed
     infoWindows.forEach(window=>window.close())
     infoWindows[infoWindows.length-1].setContent(generateHtmlString(printReadyObject))
     infoWindows[infoWindows.length-1].open(map,marker)
@@ -122,6 +142,8 @@ function retrieveSunset(marker) {
     // if there's an error, log it
     console.log(error);
   });
+
+
 }
 
 
@@ -141,14 +163,16 @@ function periodOfDay(arr, currentTime) {
 
 }
 //returns object with most proximate sunrise and sunset
-function computeSunriseAndSunset(period, sunRiseSetArray) {
+function computeSunriseAndSunset(period, sunRiseSetArray,dayLength,timeZoneAvailable) {
   if (period % 2 === 0) {
     return {
       sunrise: sunRiseSetArray[period],
       sunset: sunRiseSetArray[period - 1],
       sundown: true,
       timeSinceEvent: new Date().getTime() - sunRiseSetArray[period - 1],
-      timeBeforeEvent: sunRiseSetArray[period] - new Date().getTime()
+      timeBeforeEvent: sunRiseSetArray[period] - new Date().getTime(),
+      dayLength:dayLength,
+      timeZoneAvailable:timeZoneAvailable
     }
   }
   else {
@@ -157,22 +181,46 @@ function computeSunriseAndSunset(period, sunRiseSetArray) {
       sunset: sunRiseSetArray[period],
       sundown: false,
       timeSinceEvent: new Date().getTime() - sunRiseSetArray[period - 1],
-      timeBeforeEvent: sunRiseSetArray[period] - new Date().getTime()
-
+      timeBeforeEvent: sunRiseSetArray[period] - new Date().getTime(),
+      dayLength:dayLength,
+      timeZoneAvailable:timeZoneAvailable
     }
   }
 }
 //generates string to be rendered
 function generateHtmlString(sunRiseSetObject) {
-  if (sunRiseSetObject.sundown) {
+  //sun up all day or down all day (sunrise/sunset api returns day_length=0 in either case)
+  if (sunRiseSetObject.dayLength===0){
+    return `<div class="info-window">
+    <p>We are unable to obtain sunset/sunrise data at this latitude because either (a) the sun is up all day or (b) the sun is down all day.</p>
+    </div>`
+  }
+  //user clicks on area where google Time Zone API usually doesn't return data (e.g. middle of the ocean)
+  else if (!sunRiseSetObject.timeZoneAvailable){
+    if (sunRiseSetObject.sundown) {
+      return `<div class="info-window sundown">
+      <img src="./icons8-moon-symbol-50.png" alt="sun is currently down" />
+      <p>Currently the sun is down. ${sunRiseSetObject.timeSinceEvent} since sunset. ${sunRiseSetObject.timeBeforeEvent} until sunrise.</p>
+      </div>`
+    }
+    else {
+      return `<div class="info-window sun-up">
+    <img src="./icons8-sun-50.png" alt="sun is currently up" />
+    <p>Currently the sun is up. ${sunRiseSetObject.timeSinceEvent} since sunrise. ${sunRiseSetObject.timeBeforeEvent} until sunset</p>
+    </div>`
+    }
+  }
+  //user clicks on area where sun is currently down
+  else if (sunRiseSetObject.sundown) {
     return `<div class="info-window sundown">
-    <img src="./icons8-moon-symbol-50.png" alt="moon icon" />
+    <img src="./icons8-moon-symbol-50.png" alt="sun is currently down" />
     <p>Currently the sun is down. Sunrise is at ${sunRiseSetObject.sunrise}. ${sunRiseSetObject.timeSinceEvent} since sunset. ${sunRiseSetObject.timeBeforeEvent} until sunrise.</p>
     </div>`
   }
+  //user clicks on area where sun is currently up
   else {
     return `<div class="info-window sun-up">
-    <img src="./icons8-sun-50.png" alt="sun icon" />
+    <img src="./icons8-sun-50.png" alt="sun is currently up" />
     <p>Currently the sun is up. Sunset is at ${sunRiseSetObject.sunset}. ${sunRiseSetObject.timeSinceEvent} since sunrise. ${sunRiseSetObject.timeBeforeEvent} until sunset</p>
     </div>`
   }
@@ -204,6 +252,8 @@ function addLeadingZero(minutes){
   }
   return minutes
 }
+
+
 
 
 
