@@ -21,6 +21,7 @@ function initMap() {
     </p>
   
   `
+  //show about window on map load
   const aboutWindow = new google.maps.InfoWindow({ content: contentString, position: { lat: 40, lng: -95 } });
   infoWindows.push(aboutWindow)
   aboutWindow.open(map)
