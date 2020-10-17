@@ -15,8 +15,8 @@ This app allows the user to click on a map and provides the following feedback:
 2) The time since sunrise/sunset and the time until sunset/sunrise
 3) The local time of the most proximate future sun event.
 ## Technologies Used
-*Javascript
-*JQuery
-*HTML
-*CSS
-*Google Maps APIs
+-Javascript
+-JQuery
+-HTML
+-CSS
+-Google Maps APIs
