@@ -16,10 +16,10 @@
         flex-direction: horizontal;
         
       }
-      a {
+      li a {
         color:  rgb(233, 196, 106);
       }
-      a:visited{
+      li a:visited{
         color:  rgb(233, 196, 106)
       }
       img {
