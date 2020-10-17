@@ -1,6 +1,6 @@
-//const markers=[];
-//TODO: handle clicks on water and far northern/southern areas.
+
 const infoWindows = [];
+
 function initMap() {
 
 
@@ -21,10 +21,11 @@ function initMap() {
     </p>
   
   `
-  const infowindow = new google.maps.InfoWindow({ content: contentString, position: { lat: 40, lng: -95 } });
-  infoWindows.push(infowindow)
-  infowindow.open(map)
-
+  const aboutWindow = new google.maps.InfoWindow({ content: contentString, position: { lat: 40, lng: -95 } });
+  infoWindows.push(aboutWindow)
+  aboutWindow.open(map)
+  
+  //regenerate about infoWindow when button is clicked
   $('button').on('click', e => {
     infoWindows.forEach(window => window.close())
     infoWindows[0].open(map)
@@ -64,18 +65,14 @@ function initMap() {
 
 
 
-
+//function retrieves sunset/sunrise data and timezone offset using the lat/lng provided by marker
 function retrieveSunset(marker) {
 
 
   const currentDate = new Date().getTime();
   //urls for retrieving sunrise and sunset times for the given location
   const sunRiseSetBaseUrl = 'https://api.sunrise-sunset.org/json?';
-  const sunRiseSetKeys = {
-    lat: marker.position.lat(),
-    lng: marker.position.lng(),
-    formatted: 0
-  }
+  
   const urlYesterday = sunRiseSetBaseUrl + `lat=${marker.position.lat()}&lng=${marker.position.lng()}&formatted=0&date=yesterday`
   const urlToday = sunRiseSetBaseUrl + `lat=${marker.position.lat()}&lng=${marker.position.lng()}&formatted=0&date=today`
   const urlTomorrow = sunRiseSetBaseUrl + `lat=${marker.position.lat()}&lng=${marker.position.lng()}&formatted=0&date=tomorrow`
